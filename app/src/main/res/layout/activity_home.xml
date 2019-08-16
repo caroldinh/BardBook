@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Home">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="32dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/head"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.8"
+        app:srcCompat="@drawable/logo" />
+
+    <TextView
+        android:id="@+id/head"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:text="BardBook: Discover Poetry via Mobile App"
+        android:textAlignment="center"
+        android:textSize="20dp"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logo" />
+
+    <Button
+        android:id="@+id/randomPoem"
+        android:layout_width="231dp"
+        android:layout_height="45dp"
+        android:background="#39589F"
+        android:text="Find Random Poem"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#00D3D3D3"
+        android:onClick="start"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/head" />
+
+    <Button
+        android:id="@+id/favoritePoems"
+        android:layout_width="231dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="16dp"
+        android:background="#39589F"
+        android:text="View Favorite Poems"
+        android:textColor="#FFFFFF"
+        android:onClick="favPoems"
+        android:textColorHint="#00D3D3D3"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/randomPoem" />
+
+    <Button
+        android:id="@+id/savedQuotes"
+        android:layout_width="231dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="16dp"
+        android:background="#39589F"
+        android:text="View Saved Quotes"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#00D3D3D3"
+        android:onClick="savedQuotes"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/favoritePoems" />
+
+    <Button
+        android:id="@+id/about"
+        android:layout_width="231dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="16dp"
+        android:background="#39589F"
+        android:text="About This App"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#00D3D3D3"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/savedQuotes" />
+
+</android.support.constraint.ConstraintLayout>
