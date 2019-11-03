@@ -3,19 +3,21 @@
     package="com.example.caroline.bardbook">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
         android:configChanges="orientation"
-        android:icon="@drawable/logo_square"
+        android:icon="@mipmap/ic_launcher_foreground"
         android:label="BardBook"
-        android:roundIcon="@drawable/logo_round"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Selection"></activity>
+        <activity android:name=".AboutApp"></activity>
+        <activity android:name=".FollowedPoets" />
+        <activity android:name=".PoetPage" />
+        <activity android:name=".Selection" />
         <activity android:name=".FavPoems" />
         <activity android:name=".SavedQuotes" />
         <activity android:name=".Home">
@@ -26,6 +28,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

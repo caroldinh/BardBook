@@ -6,55 +6,84 @@
     android:layout_height="match_parent"
     tools:context=".Selection">
 
-    <TextView
-        android:id="@+id/ask"
-        android:layout_width="wrap_content"
-        android:layout_height="25dp"
-        android:text="Select Poems from"
-        android:textIsSelectable="true"
-        android:textSize="20dp"
-        app:layout_constraintHorizontal_bias="0.50"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/space"
-        tools:layout_editor_absoluteY="160dp" />
-
-    <Button
-        android:id="@+id/fromAll"
-        android:layout_width="231dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="16dp"
-        android:background="#39589F"
-        android:text="All Poets"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#00D3D3D3"
-        android:onClick="selectFromAll"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ask" />
-
-    <Button
-        android:id="@+id/fromFollowed"
-        android:layout_width="231dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="16dp"
-        android:background="#39589F"
-        android:text="Followed Poets"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#00D3D3D3"
-        android:onClick="selectFromFollowed"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fromAll" />
-
-    <Space
-        android:id="@+id/space"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="185dp" />
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp"
+        >
+
+        <LinearLayout
+            android:id="@+id/linearlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteY="100dp"
+                app:layout_constraintBottom_toTopOf="@+id/linearlayout"
+                android:visibility="visible"/>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+            <TextView
+                android:id="@+id/ask"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:text="Select Poems from"
+                android:textIsSelectable="true"
+                android:layout_gravity="center"
+                android:textSize="20dp"
+                app:layout_constraintHorizontal_bias="0.50"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                tools:layout_editor_absoluteY="160dp"
+                app:fontFamily="@font/cinzel_decorative"/>
+
+            <Button
+                android:id="@+id/fromAll"
+                android:layout_width="231dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="16dp"
+                android:background="#39589F"
+                android:text="All Poets"
+                android:layout_gravity="center"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#00D3D3D3"
+                android:onClick="selectFromAll"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ask"
+                app:fontFamily="@font/cormorant_garamond_light"/>
+
+            <Button
+                android:id="@+id/fromFollowed"
+                android:layout_width="231dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="16dp"
+                android:background="#39589F"
+                android:text="Followed Poets"
+                android:layout_gravity="center"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#00D3D3D3"
+                android:onClick="selectFromFollowed"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fromAll"
+                app:fontFamily="@font/cormorant_garamond_light"/>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>

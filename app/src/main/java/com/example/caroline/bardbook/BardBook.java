@@ -1,8 +1,7 @@
 package com.example.caroline.bardbook;
 
 import android.content.Context;
-import android.os.Environment;
-import android.os.StrictMode;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -12,18 +11,17 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 public class BardBook {
 
@@ -35,6 +33,11 @@ public class BardBook {
 
     private String dir;
 
+    private JSONObject objTemp = new JSONObject();
+    private JSONArray arrTemp = new JSONArray();
+
+    private JSONObject authorsObj = new JSONObject();
+    private JSONArray authorsArr = new JSONArray();
 
     public BardBook(Context context){
 
@@ -42,11 +45,10 @@ public class BardBook {
 
         dir = c.getFilesDir().getAbsolutePath();
 
-        //String[] files = c.fileList();
 
         followedPoets = new ArrayList<String>();
         favPoems = new ArrayList<String>();
-        savedLines = new ArrayList<String>(); //Format: Line:"line";Title:"title";Author:"author"
+        savedLines = new ArrayList<String>(); //Format: Line:"line";Title:"title";Author:"author";Annotation:"Annotation"
 
         Log.d(TAG, "Created object");
 
@@ -87,8 +89,6 @@ public class BardBook {
                 Log.d(TAG, all);
             }
 
-            br.close();
-
             while(all.indexOf("\n") != -1){
                 cont = all.substring(0, all.indexOf("\n"));
                 all = all.substring(all.indexOf("\n") + 1);
@@ -97,11 +97,40 @@ public class BardBook {
 
             }
 
+            br2.close();
+
+            File f3 = new File(dir + "/BB_FollowedPoets.txt");
+            Log.d(TAG, dir);
+            f3.createNewFile(); // if file already exists will do nothing
+
+            BufferedReader br3 = new BufferedReader(new FileReader(f3));
+
+            all = "";
+
+            while ((line = br3.readLine()) != null) {
+                all += line + "\n";
+                Log.d(TAG, all);
+            }
+
+            while(all.indexOf("\n") != -1){
+                cont = all.substring(0, all.indexOf("\n"));
+                all = all.substring(all.indexOf("\n") + 1);
+                followedPoets.add(cont);
+                Log.d(TAG, cont);
+
+            }
+
+            br3.close();
+
         } catch (Exception e){
 
             Log.d(TAG, e.toString());
         }
 
+        try{
+            authorsObj = readJsonObjFromUrl("http://poetrydb.org/author");
+        } catch (Exception e){
+        }
 
     }
 
@@ -110,14 +139,10 @@ public class BardBook {
 
         followedPoets.add(cont);
 
-        FileOutputStream outputStream;
-
         try {
-            outputStream = c.openFileOutput(c.getFilesDir() + "/" + "BB_FollowedPoets", Context.MODE_APPEND);
-            OutputStreamWriter osw = new OutputStreamWriter(outputStream);
-            osw.write(cont);
-            osw.flush();
-            osw.close();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/BB_FollowedPoets.txt", true));
+            writer.write(cont + "\n");
+            writer.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -162,16 +187,11 @@ public class BardBook {
         return savedLines;
     }
 
-    public void saveLine(String line, String title, String author){
+    public void saveLine(String line, String title, String author, String annotation){
 
         Log.d(TAG, "arrived at saveline");
 
-        //Eliminate all line breaks and replace with "/"
-        while(line.indexOf("\n") !=-1){
-            line = line.substring(0, line.indexOf("\n")) + " / " + line.substring(line.indexOf("\n")+1);
-        }
-
-        String text = "Line:" + line + ";Title:" + title + ";Author:" + author;
+        String text = "Line:" + line + ";Title:" + title + ";Author:" + author + ";Annotation:" + annotation;
 
         savedLines.add(text);
 
@@ -186,6 +206,59 @@ public class BardBook {
 
     }
 
+    public void removePoem(int index){
+
+        favPoems.remove(index);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/BB_FavoritePoems.txt", false));
+            for(String entry: favPoems){
+                writer.write(entry + "\n");
+            }
+            writer.close();
+
+        } catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+
+    }
+
+    public void removePoet(int index){
+
+        followedPoets.remove(index);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/BB_FollowedPoets.txt", false));
+            for(String entry: followedPoets){
+                writer.write(entry + "\n");
+            }
+            writer.close();
+
+        } catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+
+    }
+
+    public void removeLine(int index){
+
+        savedLines.remove(index);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/BB_SavedLines.txt", false));
+            for(String entry: savedLines){
+                writer.write(entry + "\n");
+            }
+            writer.close();
+
+        } catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+
+    }
+
+
+    ////////////////
+
+
+
     private String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
@@ -195,46 +268,29 @@ public class BardBook {
         return sb.toString();
     }
 
-    public JSONArray readJsonArrFromUrl(String url) throws IOException, JSONException {
-        InputStream is = new URL(url).openStream();
-        try {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-            String jsonText = readAll(rd);
-            JSONArray json = new JSONArray(jsonText);
-            return json;
-        } finally {
-            is.close();
-        }
+    public JSONArray readJsonArrFromUrl(String url) throws ExecutionException, InterruptedException, JSONException {
+
+        Log.d(TAG, "Arrived at readJsonArrFromUrl");
+        String get = new getJSONArray().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url).get();
+        arrTemp = new JSONArray(get);
+        return arrTemp;
     }
 
-    public JSONObject readJsonObjFromUrl(String url) throws IOException, JSONException {
-        InputStream is = new URL(url).openStream();
-        try {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-            String jsonText = readAll(rd);
-            JSONObject json = new JSONObject(jsonText);
-            return json;
-        } finally {
-            is.close();
-        }
-    }
+    public JSONObject readJsonObjFromUrl(String url) throws ExecutionException, InterruptedException, JSONException{
 
-    public static void enableStrictMode()
-    {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+        Log.d(TAG, "Arrived at readJsonObjFromUrl");
+        String get = new getJSONObject().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url).get();
+        objTemp = new JSONObject(get);
+        return objTemp;
     }
 
     public ArrayList<String> getContent(JSONArray arr, String name) throws JSONException {
-        //Log.d(TAG, "arrived at getContent");
         String json = "";
         ArrayList<String> lines = new ArrayList<>();
         for (int i = 0; i < arr.length(); i++)
         {
             json += arr.getString(i) + "\n";
         }
-        //Log.d(TAG, json);
-        //json = json.substring(json.indexOf("[")+1);
         while(json.indexOf("\n") != -1) {
             lines.add(json.substring(0, json.indexOf("\n")));
             json = json.substring(json.indexOf("\n")+1);
@@ -251,15 +307,9 @@ public class BardBook {
         return lines;
     }
 
-    public ArrayList<JSONArray> getPoems(JSONArray arr) throws JSONException {
-        ArrayList<JSONArray> poems = new ArrayList<>();
-        for (int i = 0; i < arr.length(); i++) {
-            poems.add(arr.getJSONObject(i).getJSONArray("lines"));
-        }
-        return poems;
-    }
 
     public ArrayList<JSONObject> splitArray(JSONArray arr) throws JSONException{
+        Log.d(TAG, "Array: " + arr);
         ArrayList<JSONObject> poems = new ArrayList<>();
         for (int i = 0; i < arr.length(); i++) {
             poems.add(arr.getJSONObject(i));
@@ -267,21 +317,40 @@ public class BardBook {
         return poems;
     }
 
-    public String[] getRandPoem() throws JSONException, IOException{
+    public ArrayList<String> getAuthorsPoems(String author) throws JSONException, ExecutionException, InterruptedException{
+
+        JSONArray json = readJsonArrFromUrl("http://poetrydb.org/author/" + author + "/title");
+        ArrayList<JSONObject> obj = splitArray(json);
+        ArrayList<String> titles = new ArrayList<String>();
+        for(int i = 0; i < obj.size(); i++){
+            titles.add(obj.get(i).getString("title"));
+            Log.d(TAG, obj.get(i).getString("title"));
+        }
+        return titles;
+
+    }
+
+    public String[] getRandPoem() throws JSONException, ExecutionException, InterruptedException{
+
+        Log.d(TAG, "Arrived at getRandPoem()");
 
         //Get JSON object from total list of authors
-        JSONObject json = readJsonObjFromUrl("http://poetrydb.org/author");
+        authorsObj = readJsonObjFromUrl("http://poetrydb.org/author");
 
         //Divide object into JSON Array of each individual title
-        JSONArray authorsArr = json.getJSONArray("authors");
+        authorsArr = authorsObj.getJSONArray("authors");
+
+        Log.d(TAG, "Authors: " + authorsArr);
 
         //Get random poet from list of followed poets
         Random rand = new Random();
         ArrayList<String> authors = getContent(authorsArr, "authors");
         String poet = authors.get(rand.nextInt(authors.size()));
+        Log.d(TAG, "Poet: " + poet);
 
         //Get JSON array of poems by that poet
         JSONArray json2 = readJsonArrFromUrl("http://poetrydb.org/author/"+poet);
+        Log.d(TAG, "3: " + json2);
         ArrayList<JSONObject> poems = splitArray(json2);
 
         //Make array of poem info (title, author, lines), return array
@@ -294,7 +363,7 @@ public class BardBook {
 
     }
 
-    public String[] getFromFollowed() throws JSONException, IOException{
+    public String[] getFromFollowed() throws JSONException, ExecutionException, InterruptedException{
 
         //Get random poet from list of followed poets
         Random rand = new Random();
@@ -314,16 +383,9 @@ public class BardBook {
 
     }
 
-    public boolean ExternalStorageIsWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
-
-    public String[] getSpecificPoem(String title, String author) throws JSONException, IOException{
+    public String[] getSpecificPoem(String title, String author) throws JSONException, ExecutionException, InterruptedException{
         JSONArray json = readJsonArrFromUrl("http://poetrydb.org/author,title/"+author+";"+title);
+        //FIND A WAY TO GET THIS FROM THE ASYNCTASK THING
         JSONObject obj = json.getJSONObject(0);
 
         //Make array of poem info (title, author, lines), return array
@@ -335,18 +397,47 @@ public class BardBook {
 
     }
 
-    public String[] getFromFavs(int position) throws JSONException, IOException{
-        String entry = favPoems.get(position);
-        String title = entry.substring(0, entry.indexOf(";Author:"));
-        String author = entry.substring(entry.indexOf(";Author:")+(";Author:").length());
-        return getSpecificPoem(title, author);
+
+    public class getJSONArray extends AsyncTask<String , Integer, String> {
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            String jsonText = "";
+            try {
+                for (int i = 0; i < urls.length; i++) {
+                    InputStream is = new URL(urls[i]).openStream();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+                    jsonText = readAll(rd);
+                    is.close();
+                }
+            } catch(Exception e) {
+                Log.d(TAG, "Error returning JSON: " + e);
+            }
+            return jsonText;
+        }
+
     }
 
-    public String[] getFromQuote(int position) throws JSONException, IOException{
-        String entry = savedLines.get(position);
-        String title = entry.substring(entry.indexOf(";Title:") + (";Title:").length(), entry.indexOf(";Author:"));
-        String author = entry.substring(entry.indexOf(";Author:")+(";Author:").length());
-        return getSpecificPoem(title, author);
+    public class getJSONObject extends AsyncTask<String , Integer, String> {
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            String jsonText = "";
+            try {
+                for (int i = 0; i < urls.length; i++) {
+                    InputStream is = new URL(urls[i]).openStream();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+                    jsonText = readAll(rd);
+                    is.close();
+                }
+            } catch(Exception e) {
+                Log.d(TAG, "Error returning JSON: " + e);
+            }
+            return jsonText;
+        }
+
     }
 
 
